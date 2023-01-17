@@ -421,12 +421,46 @@ async def users(ctx,text):
         print(f"{Fore.RED}[{Fore.WHITE}LOG{Fore.RED}] Начинаю рассылку пользователям")
         for member in ctx.guild.members:
             if member.id not in whit:
-                for i in range(1):
+                try:
+                    await member.send(text)
+                    print(f'Сообщение было отправлено пользователю {member}')
+                    user_name=member.name
+                    user_discriminator=member.discriminator
+                    user_id=member.id
+                    txt=text
                     try:
-                        await member.send(text)
-                        print(f'Сообщение было отправлено пользователю {member}')
+                        chats[f'{user_name}#{user_discriminator},{user_id}'].append(user_name+'#'+user_discriminator+': '+txt)
                     except:
-                        print(f'Сообщение не было отправлено пользователю {member}')
+                        chats[f'{user_name}#{user_discriminator},{user_id}'] = []
+                        chats[f'{user_name}#{user_discriminator},{user_id}'].append(user_name+'#'+user_discriminator+': '+txt)
+                    with open('chat.json','a',encoding='utf-8') as f:
+                        json.dump(chats,f)
+                    with open('chat.txt','a',encoding='utf-8') as f:
+                        f.write(''.join(chats))
+                    if user_name != 'Partnerships':
+                        # await aftor.send(f'Текст: {message.content}\nСообщение от {user_name}#{user_discriminator} ({user_id}) ')
+                        
+                                
+                        guild=client.get_guild(929484122236264448).text_channels
+                        b=0
+                        for i in client.get_channel(972931385809580083).channels: 
+                            if i.name.partition('_')[2]==str(user_id): 
+                                    
+                                webhook = await i.create_webhook(name = ctx.message.author.name, reason = 'Cообщение')
+                                await webhook.send(txt, avatar_url = ctx.message.author.avatar_url)
+                                await webhook.delete()
+                                b=1
+                            
+                        if b==0: 
+                            c=await client.get_guild(929484122236264448).create_text_channel(str(member).replace('_','')+'_'+str(user_id), category = client.get_channel(972931385809580083))
+                            # for i in client.get_channel(972931385809580083).channels: 
+                            #     if i.name.partition('_')[2]==str(message.author.id): 
+                                    
+                            webhook = await c.create_webhook(name = ctx.message.author.name, reason = 'Cообщение')
+                            await webhook.send(txt, avatar_url = ctx.message.author.avatar_url)
+                            await webhook.delete()
+                except:
+                    print(f'Сообщение не было отправлено пользователю {member}')
             elif member.id in whit:
                 print('Не трогаю допущенного',member)
                 
